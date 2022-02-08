@@ -50,16 +50,15 @@ def login(existingUser: User):
     user = serializeList(db.user.find_one({'username':existingUser.username}))
     print(user)
     return {user}
-# @app.post("/token")
-# async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-#     user_dict = fake_users_db.get(form_data.username)
-#     if not user_dict:
-#         raise HTTPException(status_code=400, detail="Incorrect username or password")
-#     user = UserInDB(**user_dict)
-#     hashed_password = fake_hash_password(form_data.password)
-#     if not hashed_password == user.hashed_password:
-#         raise HTTPException(status_code=400, detail="Incorrect username or password")
+@app.post("/token")
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user_dict = serializeDict(db.user.find_one({"username": form_data.username}))
+    print("uu",user_dict)
+    if not user_dict:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    if not form_data.password == user_dict['password']:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
 
-#     return {"access_token": user.username, "token_type": "bearer"}
+    return {"access_token": user_dict['username'], "token_type": "bearer"}
 
 
