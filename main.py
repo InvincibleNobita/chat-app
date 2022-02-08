@@ -40,20 +40,25 @@ def signup(newUser: User):
     return serializeList(db.user.find())
 
 @app.post("/send-chat")
-def send_chat(newMessage: Message):
-    db.message.insert_one(dict(newMessage))
-    return serializeList(db.message.find())
+def send_chat(newMessage: Message, token: str= Depends(oauth2_scheme)):
+    print(token)
+    if token==dict(newMessage)['username']:
+
+        db.message.insert_one(dict(newMessage))
+        return serializeList(db.message.find())
+    else:
+        return {"error":"wrong token/ bad auth"}
 
 
-@app.post("/login")
-def login(existingUser: User):
-    user = serializeList(db.user.find_one({'username':existingUser.username}))
-    print(user)
-    return {user}
+# @app.post("/login")
+# def login(existingUser: User):
+#     user = serializeList(db.user.find_one({'username':existingUser.username}))
+#     print(user)
+#     return {user}
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user_dict = serializeDict(db.user.find_one({"username": form_data.username}))
-    print("uu",user_dict)
+    print(user_dict)
     if not user_dict:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     if not form_data.password == user_dict['password']:
